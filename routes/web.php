@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('daily-reports/{dailyReport}/comments', [DailyReportCommentController::class, 'store'])
         ->name('daily-reports.comments.store');
     Route::put('daily-reports/{dailyReport}/comments/{comment}', [DailyReportCommentController::class, 'update'])
-        ->name('daily-reports.commentsupdate');
+        ->name('daily-reports.comments.update');
     Route::delete('daily-reports/{dailyReport}/comments/{comment}', [DailyReportCommentController::class, 'destroy'])
         ->name('daily-reports.comments.destroy');
 });

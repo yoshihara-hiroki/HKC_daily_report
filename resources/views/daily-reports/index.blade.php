@@ -174,19 +174,106 @@
                             @endcan
                         </div>
 
-                        <!-- コメント欄（Phase 2-2で実装予定） -->
-                        <div class="mt-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <!-- コメント欄 -->
+                        <div class="mt-8 border-t border-gray-200 pt-8">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
                                     </path>
                                 </svg>
-                                コメント
+                                コメント ({{ $dailyReport->comments->count() }})
                             </h4>
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
-                                <p class="text-gray-500">※ コメント機能はあとから実装</p>
+
+                            <div class="space-y-4 mb-8">
+                                @forelse($dailyReport->comments as $comment)
+                                    <div x-data="{ editing: false }" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <div x-show="!editing">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="flex items-center">
+                                                    <span class="font-bold text-gray-800 mr-2">{{ $comment->user->name }}</span>
+                                                    <span
+                                                        class="text-xs text-gray-500">{{ $comment->created_at->format('Y/m/d H:i') }}</span>
+                                                    @if($comment->created_at != $comment->updated_at)
+                                                        <span class="text-xs text-gray-400 ml-2">（編集済）</span>
+                                                    @endif
+                                                </div>
+
+                                                @can('update', $comment)
+                                                    <div class="flex space-x-2">
+                                                        <button @click="editing = true"
+                                                            class="text-sm text-blue-600 hover:text-blue-800">
+                                                            編集
+                                                        </button>
+                                                        <form method="POST"
+                                                            action="{{ route('daily-reports.comments.destroy', [$dailyReport, $comment]) }}"
+                                                            onsubmit="return confirm('コメントを削除しますか？');" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">
+                                                                削除
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @endcan
+                                            </div>
+                                            <p class="text-gray-700 whitespace-pre-wrap">{{ $comment->comment }}</p>
+                                        </div>
+
+                                        @can('update', $comment)
+                                            <div x-show="editing" x-cloak>
+                                                <form method="POST"
+                                                    action="{{ route('daily-reports.comments.update', [$dailyReport, $comment]) }}">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <textarea name="comment" rows="3"
+                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                        required>{{ old('comment', $comment->comment) }}</textarea>
+                                                    <div class="mt-2 flex justify-end space-x-2">
+                                                        <button type="button" @click="editing = false"
+                                                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-3 rounded text-sm">
+                                                            キャンセル
+                                                        </button>
+                                                        <button type="submit"
+                                                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm">
+                                                            更新
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        @endcan
+                                    </div>
+                                @empty
+                                    <p class="text-gray-500 italic">コメントはまだありません。</p>
+                                @endforelse
                             </div>
+
+                            @if(!$dailyReport->comments->contains('user_id', auth()->id()))
+                                <div class="bg-white border border-gray-300 rounded-lg p-4">
+                                    <h5 class="font-semibold text-gray-700 mb-2">コメント追加</h5>
+                                    <form method="POST" action="{{ route('daily-reports.comments.store', $dailyReport) }}">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <textarea name="comment" rows="3"
+                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('comment') border-red-500 @enderror"
+                                                placeholder="ここに入力..." required>{{ old('comment') }}</textarea>
+                                            @error('comment')
+                                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="flex justify-end">
+                                            <button type="submit"
+                                                class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                                                登録
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            @else
+                                <div class="text-center text-gray-500 text-sm bg-gray-50 p-2 rounded border border-gray-200">
+                                    ※ コメント済みです。修正する場合は自身のコメントの「編集」ボタンを押してください。
+                                </div>
+                            @endif
                         </div>
 
                         <!-- 作成・更新日時 -->
@@ -215,10 +302,11 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-12 bg-white border-b border-gray-200 text-center">
                         @if($selectedUserId == auth()->id())
-                            <a href="{{ route('daily-reports.create', ['date' => $selectedDate]) }}" 
+                            <a href="{{ route('daily-reports.create', ['date' => $selectedDate]) }}"
                                 class="inline-flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                    </path>
                                 </svg>
                                 日報を作成する
                             </a>
