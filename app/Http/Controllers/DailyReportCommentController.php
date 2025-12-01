@@ -7,6 +7,7 @@ use App\Models\DailyReportComment;
 use App\Http\Requests\StoreDailyReportCommentRequest;
 use App\Http\Requests\UpdateDailyReportCommentRequest;
 use Illuminate\Support\Facades\Gate;
+use Carbon\Carbon;
 
 class DailyReportCommentController extends Controller
 {
@@ -17,14 +18,14 @@ class DailyReportCommentController extends Controller
     {
         Gate::authorize('create', DailyReportComment::class);
 
-        // 既にコメントが存在する場合はエラー（1ユーザー1コメント制約）
+        // 既にコメントが存在する場合はエラー
         $existingComment = $dailyReport->comments()
             ->where('user_id', $request->user()->id)
             ->first();
 
         if ($existingComment) {
             return redirect()->route('daily-reports.index', [
-                'report_date' => $dailyReport->report_date,
+                'report_date' => Carbon::parse($dailyReport->report_date)->format('Y-m-d'),
                 'user_id' => $dailyReport->user_id
             ])->withErrors(['comment' => '既にこの日報にコメントを投稿しています。編集してください。']);
         }
@@ -35,7 +36,7 @@ class DailyReportCommentController extends Controller
         ]);
 
         return redirect()->route('daily-reports.index', [
-            'report_date' => $dailyReport->report_date,
+            'report_date' => Carbon::parse($dailyReport->report_date)->format('Y-m-d'),
             'user_id' => $dailyReport->user_id
         ])->with('success', 'コメントを投稿しました。');
     }
@@ -50,7 +51,7 @@ class DailyReportCommentController extends Controller
         $comment->update($request->validated());
 
         return redirect()->route('daily-reports.index', [
-            'report_date' => $dailyReport->report_date,
+            'report_date' => Carbon::parse($dailyReport->report_date)->format('Y-m-d'),
             'user_id' => $dailyReport->user_id
         ])->with('success', 'コメントを更新しました。');
     }
@@ -65,7 +66,7 @@ class DailyReportCommentController extends Controller
         $comment->delete();
 
         return redirect()->route('daily-reports.index', [
-            'report_date' => $dailyReport->report_date,
+            'report_date' => Carbon::parse($dailyReport->report_date)->format('Y-m-d'),
             'user_id' => $dailyReport->user_id
         ])->with('success', 'コメントを削除しました。');
     }
