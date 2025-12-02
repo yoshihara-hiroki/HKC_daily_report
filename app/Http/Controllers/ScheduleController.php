@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\Schedule;
+use App\Models\Group;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -88,28 +89,48 @@ class ScheduleController extends Controller
      */
     public function calendar(Request $request)
     {
-        // 表示する年月を取得（指定がなければ今月）
+        // 表示する年月
         $currentDate = $request->input('date')
             ? Carbon::parse($request->input('date'))
             : Carbon::now();
 
-        // カレンダーの開始日と終了日を計算（月初の週の日曜 ～ 月末の週の土曜）
-        // startOfWeek(Carbon::SUNDAY) で日曜始まりに設定
+        // 選択されたグループID
+        $selectedGroupId = $request->input('group_id'); // ★追加
+
+        // カレンダー範囲
         $startDate = $currentDate->copy()->startOfMonth()->startOfWeek(CarbonInterface::SUNDAY);
         $endDate = $currentDate->copy()->endOfMonth()->endOfWeek(CarbonInterface::SUNDAY);
 
-        // 期間内の全スケジュールを取得（ユーザー情報も一緒に）
-        $schedules = Schedule::with('user')
-            ->whereBetween('schedule_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+        // クエリの構築
+        $query = Schedule::with('user');
+
+        // ★グループ絞り込みロジック追加
+        if ($selectedGroupId) {
+            $query->whereHas('user.groups', function ($q) use ($selectedGroupId) {
+                $q->where('groups.id', $selectedGroupId);
+            });
+        }
+
+        // 期間とソート
+        $schedules = $query->whereBetween('schedule_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->orderBy('start_time')
             ->get();
 
-        // 日付ごとにスケジュールをグループ化（Viewで使いやすくするため）
-        // キー: '2025-11-01', 値: その日のスケジュールコレクション
+        // グループ化
         $schedulesByDate = $schedules->groupBy(function ($schedule) {
             return Carbon::parse($schedule->schedule_date)->format('Y-m-d');
         });
 
-        return view('schedules.calendar', compact('currentDate', 'startDate', 'endDate', 'schedulesByDate'));
+        // グループ一覧を取得（ビューのセレクトボックス用）
+        $groups = Group::all(); // ★追加
+
+        return view('schedules.calendar', compact(
+            'currentDate',
+            'startDate',
+            'endDate',
+            'schedulesByDate',
+            'groups',           // ★追加
+            'selectedGroupId'   // ★追加
+        ));
     }
 }

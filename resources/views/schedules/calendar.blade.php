@@ -1,22 +1,40 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('行先予定カレンダー') }}
             </h2>
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('schedules.calendar', ['date' => $currentDate->copy()->subMonth()->format('Y-m-d')]) }}"
-                    class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
-                    &lt; 前月
-                </a>
-                <span class="text-lg font-bold text-gray-700 whitespace-nowrap">
-                    {{ $currentDate->format('Y年n月') }}
-                </span>
-                <a href="{{ route('schedules.calendar', ['date' => $currentDate->copy()->addMonth()->format('Y-m-d')]) }}"
-                    class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-sm">
-                    翌月 &gt;
-                </a>
-            </div>
+
+            <form method="GET" action="{{ route('schedules.calendar') }}"
+                class="flex flex-col sm:flex-row items-center gap-4">
+                <input type="hidden" name="date" value="{{ $currentDate->format('Y-m-d') }}">
+
+                <select name="group_id" onchange="this.form.submit()"
+                    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                    <option value="">全ての部署</option>
+                    @foreach ($groups as $group)
+                        <option value="{{ $group->id }}" {{ $selectedGroupId == $group->id ? 'selected' : '' }}>
+                            {{ $group->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <div class="flex items-center space-x-2">
+                    <a href="{{ route('schedules.calendar', ['date' => $currentDate->copy()->subMonth()->format('Y-m-d'), 'group_id' => $selectedGroupId]) }}"
+                        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded shadow text-sm">
+                        &lt;
+                    </a>
+
+                    <span class="text-lg font-bold text-gray-700 whitespace-nowrap min-w-[100px] text-center">
+                        {{ $currentDate->format('Y年n月') }}
+                    </span>
+
+                    <a href="{{ route('schedules.calendar', ['date' => $currentDate->copy()->addMonth()->format('Y-m-d'), 'group_id' => $selectedGroupId]) }}"
+                        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-3 border border-gray-400 rounded shadow text-sm">
+                        &gt;
+                    </a>
+                </div>
+            </form>
         </div>
     </x-slot>
 
