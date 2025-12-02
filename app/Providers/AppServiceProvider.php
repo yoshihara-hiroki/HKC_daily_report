@@ -6,8 +6,11 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\DailyReport;
 use App\Models\DailyReportComment;
+use App\Models\Schedule;
 use App\Policies\DailyReportPolicy;
 use App\Policies\DailyReportCommentPolicy;
+use App\Policies\SchedulePolicy;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // ポリシーの登録
         Gate::policy(DailyReport::class, DailyReportPolicy::class);
-        Gate::policy(DailyReportComment::class, DailyReportCommentPolicy::class); // 追加
+        Gate::policy(DailyReportComment::class, DailyReportCommentPolicy::class);
+        Gate::policy(Schedule::class, SchedulePolicy::class);
     }
 }

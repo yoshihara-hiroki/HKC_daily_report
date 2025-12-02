@@ -20,6 +20,17 @@
                     <x-nav-link :href="route('daily-reports.index')" :active="request()->routeIs('daily-reports.*')">
                         {{ __('日報詳細') }}
                     </x-nav-link>
+
+                    <!-- 行先予定 -->
+                    <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
+                        {{ __('行先予定') }}
+                    </x-nav-link>
+
+                    <!-- 行先カレンダー -->
+                    <x-nav-link :href="route('schedules.calendar')" :active="request()->routeIs('schedules.calendar')">
+                        {{ __('行先カレンダー') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 
@@ -87,6 +98,17 @@
             <x-responsive-nav-link :href="route('daily-reports.index')" :active="request()->routeIs('daily-reports.*')">
                 {{ __('日報詳細') }}
             </x-responsive-nav-link>
+
+            <!-- 行先予定 -->
+            <x-responsive-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
+                {{ __('行先予定') }}
+            </x-responsive-nav-link>
+
+            <!--行先カレンダー -->
+            <x-responsive-nav-link :href="route('schedules.calendar')" :active="request()->routeIs('schedules.calendar')">
+                {{ __('行先カレンダー') }}
+            </x-responsive-nav-link>
+
         </div>
 
         <!-- Responsive Settings Options -->

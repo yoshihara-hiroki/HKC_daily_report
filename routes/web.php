@@ -3,6 +3,7 @@
 use App\Http\Controllers\DailyReportCommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DailyReportController;
+use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,13 +20,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // デバッグ用
-    Route::get('/debug-user', function() {
+    Route::get('/debug-user', function () {
         return [
             'user_id' => auth()->id(),
             'user_email' => auth()->user()->email,
         ];
     });
-    
+
     // 日報機能
     Route::resource('daily-reports', DailyReportController::class);
 
@@ -36,6 +37,12 @@ Route::middleware('auth')->group(function () {
         ->name('daily-reports.comments.update');
     Route::delete('daily-reports/{dailyReport}/comments/{comment}', [DailyReportCommentController::class, 'destroy'])
         ->name('daily-reports.comments.destroy');
+
+    // 行先予定カレンダー表示
+    Route::get('schedules/calendar', [ScheduleController::class, 'calendar'])->name('schedules.calendar');
+
+    // 行先予定
+    Route::resource('schedules', ScheduleController::class)->except(['show']);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
