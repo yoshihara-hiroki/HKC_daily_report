@@ -60,9 +60,49 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## デバッグ手順
-bash
+## デバッグ方法
+初回セットアップ
+1.リポジトリをクローン
+
+Bash
+
+git clone [リポジトリURL]
+cd HKC_daily_report
+
+2.環境設定ファイルの作成
+
+Bash
+
+cp .env.example .env
+必要に応じて .env の中身（DB設定など）を修正
+
+3.依存関係（vendor）のインストール ★ここが最重要 まだ Sail が使えないので、一時的なDockerコンテナを使って composer install を行う。以下のコマンドを実行。
+
+Bash
+
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php84-composer:latest \
+    composer install --ignore-platform-reqs
+
+4.Sail（Docker）の起動 
+
+Bash
+
 ./vendor/bin/sail up -d
 
-bash
-npm run dev
+5.アプリケーションキーの生成 & DBセットアップ
+
+Bash
+
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed  # DB作成と初期データ投入
+
+6.フロントエンドのビルド
+
+Bash
+
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
