@@ -56,7 +56,7 @@ class GroupController extends Controller
         ]);
 
         // 所属社員の同期処理（チェックされたユーザーだけ所属に更新）
-        $group->users()->sync($validated['users'] ?? []);
+        $group->users()->sync($validated['users'] ?? []); // チェックボックスが一つも押されていない場合、空配列を渡して全員の所属を解除
 
         return redirect()->route('admin.groups.index')
             ->with('success', 'グループ情報を更新しました。');
