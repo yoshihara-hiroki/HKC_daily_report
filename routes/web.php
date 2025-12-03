@@ -4,15 +4,12 @@ use App\Http\Controllers\DailyReportCommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\Admin\GroupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check() ? redirect()->route('daily-reports.index') : view('auth.login');
 });
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -43,6 +40,11 @@ Route::middleware('auth')->group(function () {
 
     // 行先予定
     Route::resource('schedules', ScheduleController::class)->except(['show']);
+
+    // 管理者ルート
+    Route::middleware('can:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('groups', GroupController::class);
+    });
 });
 
 require __DIR__ . '/auth.php';
