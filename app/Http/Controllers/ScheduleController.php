@@ -95,7 +95,7 @@ class ScheduleController extends Controller
             : Carbon::now();
 
         // 選択されたグループID
-        $selectedGroupId = $request->input('group_id'); 
+        $selectedGroupId = $request->input('group_id');
 
         // カレンダー範囲
         $startDate = $currentDate->copy()->startOfMonth()->startOfWeek(CarbonInterface::SUNDAY);
@@ -116,21 +116,36 @@ class ScheduleController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // グループ化
-        $schedulesByDate = $schedules->groupBy(function ($schedule) {
-            return Carbon::parse($schedule->schedule_date)->format('Y-m-d');
+        // Alpine.js（カレンダー）で扱いやすいようにデータを整形・変換する
+        $events = $schedules->map(function ($schedule) {
+            return [
+                'id' => $schedule->id,
+                'user_id' => $schedule->user_id,
+                'title' => $schedule->destination,
+                'start' => Carbon::parse($schedule->schedule_date)->format('Y-m-d'),
+
+                // datetimeキャスト対策：時間だけを文字列(H:i)で抽出
+                'time' => $schedule->start_time ? $schedule->start_time->format('H:i') : '',
+                'end_time' => $schedule->end_time ? $schedule->end_time->format('H:i') : null,
+
+                'user_name' => $schedule->user->name,
+
+                // Web会議情報もJSに渡す
+                'is_web_meeting' => $schedule->is_web_meeting,
+                'meeting_type' => $schedule->meeting_type,
+            ];
         });
 
         // グループ一覧を取得
-        $groups = Group::all(); 
+        $groups = Group::all();
 
         return view('schedules.calendar', compact(
             'currentDate',
             'startDate',
             'endDate',
-            'schedulesByDate',
-            'groups',           
-            'selectedGroupId'   
+            'events',          
+            'groups',
+            'selectedGroupId'
         ));
     }
 }

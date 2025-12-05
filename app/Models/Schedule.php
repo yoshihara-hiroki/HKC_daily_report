@@ -15,12 +15,20 @@ class Schedule extends Model
         'start_time',
         'end_time',
         'destination',
+        // 以下Web会議の内容
+        'is_web_meeting',
+        'meeting_type',
+        'meeting_url',
+        'participants_memo',
     ];
 
     protected function casts(): array
     {
         return [
             'schedule_date' => 'date',
+            'start_time' => 'datetime',
+            'end_time' => 'datetime',
+            'is_web_meeting' => 'boolean',
         ];
     }
 

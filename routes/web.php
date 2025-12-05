@@ -43,9 +43,6 @@ Route::middleware('auth')->group(function () {
     // 行先予定
     Route::resource('schedules', ScheduleController::class)->except(['show']);
 
-    // Web会議予定
-    Route::resource('web-meetings', WebMeetingController::class);
-
     // 管理者ルート
     Route::middleware('can:admin')->prefix('admin')->name('admin.')->group(function () {
 

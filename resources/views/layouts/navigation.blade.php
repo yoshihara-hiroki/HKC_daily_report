@@ -22,10 +22,6 @@
                         {{ __('行先カレンダー') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('web-meetings.index')" :active="request()->routeIs('web-meetings.*')">
-                        {{ __('Web会議') }}
-                    </x-nav-link>
-
                 </div>
             </div>
 
@@ -126,10 +122,6 @@
 
             <x-responsive-nav-link :href="route('schedules.calendar')" :active="request()->routeIs('schedules.calendar')">
                 {{ __('行先カレンダー') }}
-            </x-responsive-nav-link>
-
-            <x-responsive-nav-link :href="route('web-meetings.index')" :active="request()->routeIs('web-meetings.*')">
-                {{ __('Web会議') }}
             </x-responsive-nav-link>
 
         </div>

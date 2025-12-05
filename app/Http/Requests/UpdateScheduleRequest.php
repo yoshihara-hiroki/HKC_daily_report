@@ -26,6 +26,11 @@ class UpdateScheduleRequest extends FormRequest
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'destination' => ['required', 'string', 'max:255'],
+            // Web会議用のバリデーション追加
+            'is_web_meeting' => ['sometimes', 'boolean'],
+            'meeting_type' => ['nullable', 'required_if:is_web_meeting,true', 'string'], 
+            'meeting_url' => ['nullable', 'url', 'max:255'],
+            'participants_memo' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -33,9 +38,12 @@ class UpdateScheduleRequest extends FormRequest
     {
         return [
             'schedule_date' => '日付',
-            'start_time' => '開始時刻',
-            'end_time' => '終了時刻',
+            'start_time' => '開始時間',
+            'end_time' => '終了時間',
             'destination' => '行先・目的',
+            'meeting_type' => '会議ツール',
+            'meeting_url' => '会議URL',
+            'participants_memo' => '参加者メモ',
         ];
     }
 }
