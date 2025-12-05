@@ -24,6 +24,8 @@ class WebMeeting extends Model
     {
         return [
             'meeting_date' => 'date',            
+            'start_time' => 'datetime',
+            'end_time' => 'datetime',
         ];
     }
 

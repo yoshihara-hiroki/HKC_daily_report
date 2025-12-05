@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('meeting_date');
-            $table->time('strart_time');
+            $table->time('start_time');
             $table->time('end_time')->nullable();
             $table->enum('meeting_type', ['zoom', 'google_meet']);
             $table->string('title');

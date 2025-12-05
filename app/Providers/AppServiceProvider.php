@@ -8,9 +8,11 @@ use App\Models\DailyReport;
 use App\Models\DailyReportComment;
 use App\Models\Schedule;
 use App\Models\User;
+use App\Models\WebMeeting;
 use App\Policies\DailyReportPolicy;
 use App\Policies\DailyReportCommentPolicy;
 use App\Policies\SchedulePolicy;
+use App\Policies\WebMeetingPolicy;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DailyReport::class, DailyReportPolicy::class);
         Gate::policy(DailyReportComment::class, DailyReportCommentPolicy::class);
         Gate::policy(Schedule::class, SchedulePolicy::class);
+        Gate::policy(WebMeeting::class, WebMeetingPolicy::class);
 
         // 管理者ゲートの定義（roleがadminのみ管理者権限）
         Gate::define('admin', function (User $user) {

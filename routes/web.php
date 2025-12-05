@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\Admin\GroupController;
+use App\Http\Controllers\WebMeetingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -40,6 +41,9 @@ Route::middleware('auth')->group(function () {
 
     // 行先予定
     Route::resource('schedules', ScheduleController::class)->except(['show']);
+
+    // Web会議予定
+    Route::resource('web-meetings', WebMeetingController::class);
 
     // 管理者ルート
     Route::middleware('can:admin')->prefix('admin')->name('admin.')->group(function () {
