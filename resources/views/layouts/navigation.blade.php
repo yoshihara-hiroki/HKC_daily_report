@@ -51,6 +51,9 @@
                             </x-slot>
 
                             <x-slot name="content">
+                                <x-dropdown-link :href="route('admin.users.index')">
+                                    {{ __('ユーザー管理') }}
+                                </x-dropdown-link>
                                 <x-dropdown-link :href="route('admin.groups.index')">
                                     {{ __('部署設定') }}
                                 </x-dropdown-link>
@@ -140,6 +143,9 @@
             <div class="mt-3 space-y-1">
                 {{-- 管理者メニュー --}}
                 @can('admin')
+                    <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                        {{ __('マスタ管理：ユーザー管理') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.groups.index')" :active="request()->routeIs('admin.groups.*')">
                         {{ __('マスタ管理：部署設定') }}
                     </x-responsive-nav-link>

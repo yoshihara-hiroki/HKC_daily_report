@@ -6,6 +6,7 @@ use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\WebMeetingController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -47,7 +48,12 @@ Route::middleware('auth')->group(function () {
 
     // 管理者ルート
     Route::middleware('can:admin')->prefix('admin')->name('admin.')->group(function () {
+
+        // 部署（グループ）管理
         Route::resource('groups', GroupController::class);
+
+        // ユーザー管理
+        Route::resource('users', UserController::class); 
     });
 });
 
