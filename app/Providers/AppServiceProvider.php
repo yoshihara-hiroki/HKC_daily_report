@@ -34,7 +34,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DailyReport::class, DailyReportPolicy::class);
         Gate::policy(DailyReportComment::class, DailyReportCommentPolicy::class);
         Gate::policy(Schedule::class, SchedulePolicy::class);
-        Gate::policy(WebMeeting::class, WebMeetingPolicy::class);
 
         // 管理者ゲートの定義（roleがadminのみ管理者権限）
         Gate::define('admin', function (User $user) {

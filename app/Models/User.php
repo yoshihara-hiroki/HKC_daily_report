@@ -97,14 +97,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Web会議予定を取得
-     */
-    public function webMeetings()
-    {
-        return $this->hasMany(WebMeeting::class);
-    }
-
-    /**
      * 社用車予約状況を取得
      */
     public function vehicleReservations()
