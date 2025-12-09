@@ -11,7 +11,10 @@
                 <div class="p-6 text-gray-900">
 
                     {{-- Alpine.js で状態管理: isWebMeeting --}}
-                    <form method="POST" action="{{ route('schedules.store') }}" x-data="{ isWebMeeting: {{ old('is_web_meeting') ? 'true' : 'false' }} }">
+                    <form method="POST" action="{{ route('schedules.store') }}" x-data="{
+                        isWebMeeting: {{ old('is_web_meeting') ? 'true' : 'false' }},
+                        isVehicle: {{ old('is_vehicle_reservation') ? 'true' : 'false' }}
+                    }">
                         @csrf
 
                         {{-- (既存) 日付 --}}
@@ -83,7 +86,7 @@
 
                         <hr class="my-6 border-gray-200">
 
-                        {{-- ★★★ ここからオプションエリア ★★★ --}}
+                        {{--  ここから追加エリア  --}}
                         <h3 class="text-lg font-medium text-gray-900 mb-4">追加設定</h3>
 
                         {{-- Web会議チェックボックス --}}
@@ -132,6 +135,37 @@
                                     class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                     rows="2">{{ old('participants_memo') }}</textarea>
                                 <x-input-error :messages="$errors->get('participants_memo')" class="mt-2" />
+                            </div>
+                        </div>
+
+                        {{-- 社用車チェックボックス --}}
+                        <div class="mb-4 mt-6">
+                            <input type="hidden" name="is_vehicle_reservation" value="0">
+                            <label for="is_vehicle_reservation" class="inline-flex items-center cursor-pointer">
+                                <input id="is_vehicle_reservation" type="checkbox" name="is_vehicle_reservation"
+                                    value="1" x-model="isVehicle"
+                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <span class="ms-2 text-gray-700 font-bold">社用車を利用する</span>
+                            </label>
+                        </div>
+
+                        {{-- 社用車選択エリア (スライド表示) --}}
+                        <div x-show="isVehicle" x-transition.duration.300ms
+                            class="bg-green-50 p-4 rounded-lg mb-6 space-y-4 border border-green-100">
+                            <div>
+                                <x-input-label for="vehicle_id" :value="__('車両選択')" />
+                                <select id="vehicle_id" name="vehicle_id"
+                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">選択してください</option>
+                                    @foreach ($vehicles as $vehicle)
+                                        <option value="{{ $vehicle->id }}" {{-- createの場合 --}}
+                                            {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>
+                                            {{ $vehicle->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('vehicle_id')" class="mt-2" />
+                                <p class="text-xs text-gray-500 mt-2">※日時はスケジュールの時間が自動的に適用されます。</p>
                             </div>
                         </div>
 

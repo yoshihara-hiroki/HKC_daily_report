@@ -39,4 +39,12 @@ class Schedule extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * 紐づいている社用車
+     */
+    public function vehicleReservation()
+    {
+        return $this->hasOne(VehicleReservation::class);
+    }
 }

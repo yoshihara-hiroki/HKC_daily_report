@@ -95,7 +95,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-bold text-gray-900" x-text="formatDate(selectedDate)"></h3>
 
-                        {{-- ★修正点: 新規登録ボタンに日付パラメータを付与 --}}
+                        {{-- 新規登録ボタンに日付パラメータを付与 --}}
                         <a :href="`{{ route('schedules.create') }}?date=${selectedDate}`"
                             class="inline-flex items-center px-3 py-1 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
                             + 予定登録
@@ -126,6 +126,17 @@
                                                 <span
                                                     class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                                     <span x-text="event.meeting_type || 'Web会議'"></span>
+                                                </span>
+                                            </template>
+
+                                            {{-- 社用車バッジ --}}
+                                            <template x-if="event.vehicle_name">
+                                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                    {{-- 車アイコン --}}
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                    <span x-text="event.vehicle_name"></span>
                                                 </span>
                                             </template>
                                         </div>

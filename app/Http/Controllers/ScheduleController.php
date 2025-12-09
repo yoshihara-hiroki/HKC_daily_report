@@ -6,6 +6,8 @@ use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\Schedule;
 use App\Models\Group;
+use App\Models\Vehicle;
+use App\Models\VehicleReservation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -34,7 +36,10 @@ class ScheduleController extends Controller
     {
         // パラメータから日付を取得（デフォは今日）
         $defaultDate = $request->input('date', date('Y-m-d'));
-        return view('schedules.create', compact('defaultDate'));
+
+        // 有効な社用車一覧を取得
+        $vehicles = Vehicle::active()->orderBy('id')->get();
+        return view('schedules.create', compact('defaultDate', 'vehicles'));
     }
 
     /**
@@ -42,7 +47,22 @@ class ScheduleController extends Controller
      */
     public function store(StoreScheduleRequest $request)
     {
-        $request->user()->schedules()->create($request->validated());
+        Gate::authorize('create', Schedule::class);
+
+        $validated = $request->validated();
+
+        $schedule = $request->user()->schedules()->create($validated);
+
+        // 社用車の予約処理
+        if ($request->boolean('is_vehicle_reservation') && isset($validated['vehicle_id'])) {
+            $schedule->vehicleReservation()->create([
+                'vehicle_id' => $validated['vehicle_id'],
+                'user_id' => $request->user()->id,
+                'reservation_date' => $schedule->schedule_date,
+                'start_time' => $schedule->start_time,
+                'end_time' => $schedule->end_time,
+            ]);
+        }
 
         return redirect()->route('schedules.index')
             ->with('success', '行先予定を登録しました。');
@@ -55,7 +75,10 @@ class ScheduleController extends Controller
     {
         Gate::authorize('update', $schedule);
 
-        return view('schedules.edit', compact('schedule'));
+        // 有効な社用車一覧を取得
+        $vehicles = Vehicle::active()->orderBy('id')->get();
+
+        return view('schedules.edit', compact('schedule', 'vehicles'));
     }
 
     /**
@@ -65,7 +88,33 @@ class ScheduleController extends Controller
     {
         Gate::authorize('update', $schedule);
 
-        $schedule->update($request->validated());
+        $validated = $request->validated();
+        $schedule->update($validated);
+
+        // 社用車予約の処理
+        if ($request->boolean('is_vehicle_reservation') && isset($validated['vehicle_id'])) {
+
+            $reservationData = [
+                'vehicle_id' => $validated['vehicle_id'],
+                'user_id' => $schedule->user_id,
+                'reservation_date' => $schedule->schedule_date,
+                'start_time' => $schedule->start_time,
+                'end_time' => $schedule->end_time,
+            ];
+
+            if ($schedule->vehicleReservation) {
+                // 既に予約がある場合は更新
+                $schedule->vehicleReservation->update($reservationData);
+            } else {
+                // 新規作成
+                $schedule->vehicleReservation()->create($reservationData);
+            }
+        } else {
+            // チェックが外れていたら既存の予約を削除
+            if ($schedule->vehicleReservation) {
+                $schedule->vehicleReservation->delete();
+            }
+        }
 
         return redirect()->route('schedules.index')
             ->with('success', '行先予定を更新しました。');
@@ -102,7 +151,7 @@ class ScheduleController extends Controller
         $endDate = $currentDate->copy()->endOfMonth()->endOfWeek(CarbonInterface::SUNDAY);
 
         // クエリの構築
-        $query = Schedule::with('user');
+        $query = Schedule::with(['user', 'vehicleReservation.vehicle']);
 
         // グループ絞り込み
         if ($selectedGroupId) {
@@ -116,23 +165,25 @@ class ScheduleController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // Alpine.js（カレンダー）で扱いやすいようにデータを整形・変換する
+        // Alpine.js（カレンダー）で扱いやすいようにデータを整形
         $events = $schedules->map(function ($schedule) {
             return [
                 'id' => $schedule->id,
                 'user_id' => $schedule->user_id,
                 'title' => $schedule->destination,
                 'start' => Carbon::parse($schedule->schedule_date)->format('Y-m-d'),
-
-                // datetimeキャスト対策：時間だけを文字列(H:i)で抽出
                 'time' => $schedule->start_time ? $schedule->start_time->format('H:i') : '',
                 'end_time' => $schedule->end_time ? $schedule->end_time->format('H:i') : null,
-
                 'user_name' => $schedule->user->name,
 
-                // Web会議情報もJSに渡す
+                // Web会議情報
                 'is_web_meeting' => $schedule->is_web_meeting,
                 'meeting_type' => $schedule->meeting_type,
+
+                // 社用車情報
+                'vehicle_name' => $schedule->vehicleReservation && $schedule->vehicleReservation->vehicle
+                    ? $schedule->vehicleReservation->vehicle->name
+                    : null,
             ];
         });
 
@@ -143,7 +194,7 @@ class ScheduleController extends Controller
             'currentDate',
             'startDate',
             'endDate',
-            'events',          
+            'events',
             'groups',
             'selectedGroupId'
         ));

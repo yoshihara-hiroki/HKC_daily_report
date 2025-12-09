@@ -28,4 +28,12 @@ class Vehicle extends Model
     {
         return $this->hasMany(VehicleReservation::class);
     }
+
+    /**
+     * 有効な車両のみ取得するスコープ
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }
