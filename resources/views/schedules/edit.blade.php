@@ -13,7 +13,8 @@
                     {{-- Alpine.js で状態管理: 初期値をDBの値から設定 --}}
                     <form method="POST" action="{{ route('schedules.update', $schedule) }}" x-data="{
                         isWebMeeting: {{ old('is_web_meeting', $schedule->is_web_meeting) ? 'true' : 'false' }},
-                        isVehicle: {{ old('is_vehicle_reservation', $schedule->vehicleReservation ? 'true' : 'false') }}
+                        isVehicle: {{ old('is_vehicle_reservation', $schedule->vehicleReservation ? 'true' : 'false') }},
+                        isMeetingRoom: {{ old('is_meeting_room', $schedule->meetingRoomReservation ? 'true' : 'false') }}
                     }">
                         @csrf
                         @method('PUT')
@@ -170,6 +171,37 @@
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('vehicle_id')" class="mt-2" />
+                                <p class="text-xs text-gray-500 mt-2">※日時はスケジュールの時間が自動的に適用されます。</p>
+                            </div>
+                        </div>
+
+                        {{-- 会議室チェックボックス --}}
+                        <div class="mb-4 mt-6">
+                            <input type="hidden" name="is_meeting_room" value="0">
+                            <label for="is_meeting_room" class="inline-flex items-center cursor-pointer">
+                                <input id="is_meeting_room" type="checkbox" name="is_meeting_room"
+                                    value="1" x-model="isMeetingRoom"
+                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <span class="ms-2 text-gray-700 font-bold">会議室を利用する</span>
+                            </label>
+                        </div>
+
+                        {{-- 会議室選択エリア (スライド表示) --}}
+                        <div x-show="isMeetingRoom" x-transition.duration.300ms
+                            class="bg-green-50 p-4 rounded-lg mb-6 space-y-4 border border-green-100">
+                            <div>
+                                <x-input-label for="meeting_room_id" :value="__('会議室')" />
+                                <select id="meeting_room_id" name="meeting_room_id"
+                                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">選択してください</option>
+                                    @foreach ($meetingRooms as $room)
+                                        <option value="{{ $room->id }}" {{-- createの場合 --}}
+                                            {{ old('meeting_room_id', optional($schedule->meetingRoomReservation)->meeting_room_id) == $room->id ? 'selected' : '' }}>
+                                            {{ $room->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('meeting_room_id')" class="mt-2" />
                                 <p class="text-xs text-gray-500 mt-2">※日時はスケジュールの時間が自動的に適用されます。</p>
                             </div>
                         </div>

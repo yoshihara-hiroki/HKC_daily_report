@@ -8,6 +8,7 @@ use App\Models\Schedule;
 use App\Models\Group;
 use App\Models\Vehicle;
 use App\Models\VehicleReservation;
+use App\Models\MeetingRoom;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -37,9 +38,11 @@ class ScheduleController extends Controller
         // パラメータから日付を取得（デフォは今日）
         $defaultDate = $request->input('date', date('Y-m-d'));
 
-        // 有効な社用車一覧を取得
+        // 有効な社用車と会議室を取得
         $vehicles = Vehicle::active()->orderBy('id')->get();
-        return view('schedules.create', compact('defaultDate', 'vehicles'));
+        $meetingRooms = MeetingRoom::active()->orderBy('id')->get();
+
+        return view('schedules.create', compact('defaultDate', 'vehicles', 'meetingRooms'));
     }
 
     /**
@@ -64,6 +67,17 @@ class ScheduleController extends Controller
             ]);
         }
 
+        //会議室の予約処理
+        if ($request->boolean('is_meeting_room') && isset($validated['meeting_room_id'])) {
+            $schedule->meetingRoomReservation()->create([
+                'meeting_room_id' => $validated['meeting_room_id'],
+                'user_id' => $request->user()->id,
+                'reservation_date' => $schedule->schedule_date,
+                'start_time' => $schedule->start_time,
+                'end_time' => $schedule->end_time,
+            ]);
+        }
+
         return redirect()->route('schedules.index')
             ->with('success', '行先予定を登録しました。');
     }
@@ -75,10 +89,11 @@ class ScheduleController extends Controller
     {
         Gate::authorize('update', $schedule);
 
-        // 有効な社用車一覧を取得
+        // 有効な社用車と会議室を取得
         $vehicles = Vehicle::active()->orderBy('id')->get();
+        $meetingRooms = MeetingRoom::active()->orderBy('id')->get();
 
-        return view('schedules.edit', compact('schedule', 'vehicles'));
+        return view('schedules.edit', compact('schedule', 'vehicles', 'meetingRooms'));
     }
 
     /**
@@ -113,6 +128,29 @@ class ScheduleController extends Controller
             // チェックが外れていたら既存の予約を削除
             if ($schedule->vehicleReservation) {
                 $schedule->vehicleReservation->delete();
+            }
+        }
+
+        if ($request->boolean('is_meeting_room') && isset($validated['meeting_room_id'])) {
+            $meetingData = [
+                'meeting_room_id' => $validated['meeting_room_id'],
+                'user_id' => $schedule->user_id,
+                'reservation_date' => $schedule->schedule_date,
+                'start_time' => $schedule->start_time,
+                'end_time' => $schedule->end_time,
+            ];
+
+            if ($schedule->meetingRoomReservation) {
+                // 既に予約がある場合は更新
+                $schedule->meetingRoomReservation->update($meetingData);
+            } else {
+                // 新規作成
+                $schedule->meetingRoomReservation()->create($meetingData);
+            }
+        } else {
+            // チェックが外れていたら既存の予約を削除
+            if ($schedule->meetingRoomReservation) {
+                $schedule->meetingRoomReservation->delete();
             }
         }
 
@@ -151,7 +189,7 @@ class ScheduleController extends Controller
         $endDate = $currentDate->copy()->endOfMonth()->endOfWeek(CarbonInterface::SUNDAY);
 
         // クエリの構築
-        $query = Schedule::with(['user', 'vehicleReservation.vehicle']);
+        $query = Schedule::with(['user', 'vehicleReservation.vehicle', 'meetingRoomReservation.meetingRoom']);
 
         // グループ絞り込み
         if ($selectedGroupId) {
@@ -183,6 +221,11 @@ class ScheduleController extends Controller
                 // 社用車情報
                 'vehicle_name' => $schedule->vehicleReservation && $schedule->vehicleReservation->vehicle
                     ? $schedule->vehicleReservation->vehicle->name
+                    : null,
+
+                // 会議室情報
+                'meeting_room_name' => $schedule->meetingRoomReservation && $schedule->meetingRoomReservation->meetingRoom
+                    ? $schedule->meetingRoomReservation->meetingRoom->name
                     : null,
             ];
         });

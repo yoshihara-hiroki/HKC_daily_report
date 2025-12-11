@@ -47,4 +47,12 @@ class Schedule extends Model
     {
         return $this->hasOne(VehicleReservation::class);
     }
+
+    /**
+     * 紐づいている会議室
+     */
+    public function meetingRoomReservation()
+    {
+        return $this->hasOne(MeetingRoomReservation::class);
+    }
 }

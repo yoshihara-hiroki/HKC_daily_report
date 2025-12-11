@@ -7,6 +7,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\WebMeetingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\MeetingRoomController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -51,6 +52,9 @@ Route::middleware('auth')->group(function () {
 
         // ユーザー管理
         Route::resource('users', UserController::class); 
+
+        // 会議室管理
+        Route::resource('meeting-rooms', MeetingRoomController::class)->except(['show']);
     });
 });
 

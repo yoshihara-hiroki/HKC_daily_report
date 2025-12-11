@@ -14,7 +14,7 @@
                         {{ __('日報詳細') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
+                    <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*') && !request()->routeIs('schedules.calendar')">
                         {{ __('行先予定') }}
                     </x-nav-link>
 
@@ -52,6 +52,9 @@
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('admin.groups.index')">
                                     {{ __('部署設定') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.meeting-rooms.index')">
+                                    {{ __('会議室管理') }}
                                 </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
@@ -116,7 +119,7 @@
                 {{ __('日報詳細') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
+            <x-responsive-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*') && !request()->routeIs('schedules.calendar')">
                 {{ __('行先予定') }}
             </x-responsive-nav-link>
 
@@ -140,6 +143,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.groups.index')" :active="request()->routeIs('admin.groups.*')">
                         {{ __('マスタ管理：部署設定') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.meeting-rooms.index')" :active="request()->routeIs('admin.meeting-rooms.*')">
+                        {{ __('会議室管理') }}
                     </x-responsive-nav-link>
                 @endcan
 

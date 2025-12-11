@@ -34,6 +34,9 @@ class UpdateScheduleRequest extends FormRequest
             // 社用車予約用のバリデーション
             'is_vehicle_reservation' => ['sometimes', 'boolean'],
             'vehicle_id' => ['nullable', 'required_if:is_vehicle_reservation,true', 'exists:vehicles,id'],
+            // 会議室用のバリデーション
+            'is_meeting_room' => ['boolean'],
+            'meeting_room_id' => ['nullable', 'required_if:is_meeting_room,true', 'exists:meeting_rooms,id'],
         ];
     }
 
@@ -48,6 +51,7 @@ class UpdateScheduleRequest extends FormRequest
             'meeting_url' => '会議URL',
             'participants_memo' => '参加者メモ',
             'vehicle_id' => '社用車',
+            'meeting_room_id' => '会議室',
         ];
     }
 }
