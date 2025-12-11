@@ -60,14 +60,6 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## デバッグ方法
-開発環境の移行完了、おめでとうございます！
-ご要望の通り、新しいPCでプロジェクトをセットアップする際の手順書を作成しました。
-
-これを `README.md` に追記するか、`SETUP.md` などの別ファイルとして保存しておくと、チームメンバーや未来の自分への共有に便利です。
-
------
-
 # 開発環境セットアップ手順 (Docker / Nginx + PHP-FPM版)
 
 本プロジェクトは **Docker Compose** を使用した独自環境（Nginx + PHP-FPM）で構築されています。
